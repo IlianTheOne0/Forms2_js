@@ -1,0 +1,145 @@
+#registration-form
+{
+	width: 400px;
+	margin: 50px auto;
+
+	padding: 20px;
+	background-color: #f4f4f4;
+	
+	border-radius: 8px;
+	box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+#registration-form h1
+{
+	text-align: center;
+
+	margin-bottom: 20px;
+}
+
+#registration-form label
+{
+	display: block;
+	
+	font-weight: bold;
+}
+
+#registration-form input
+{
+	width: 100%;
+	
+	margin: 5px 0 15px;
+	padding: 15px 5px;
+
+	font-size: 14px;
+
+	border: 1px solid #ccc;
+	border-radius: 4px;
+
+	box-sizing: border-box;
+}
+
+#registration-form .checkbox-wrapper
+{
+	display: flex;
+	align-items: center;
+
+	margin-bottom: 15px;
+	
+	font-size: 14px;
+	
+	cursor: pointer;
+	user-select: none;
+}
+
+#registration-form .checkbox-wrapper input[type="checkbox"]
+{
+	display: none;
+}
+
+#registration-form .checkbox-custom
+{
+	width: 18px;
+	height: 18px;
+
+	position: relative;
+
+	display: inline-block;
+	
+	margin-right: 10px;
+
+	border: 2px solid #28a745;
+	border-radius: 4px;
+	
+	transition: all 0.2s ease;
+}
+
+#registration-form .checkbox-custom::after
+{
+	content: "";
+	
+	width: 5px;
+	height: 10px;
+
+	position: absolute;
+	top: 2px;
+	left: 6px;
+	
+	border: solid white;
+	border-width: 0 2px 2px 0;
+
+	transform: rotate(45deg);
+	opacity: 0;
+	transition: opacity 0.2s ease;
+}
+
+#registration-form .checkbox-wrapper input[type="checkbox"]:checked + .checkbox-custom
+{
+	background-color: #28a745;
+	border-color: #28a745;
+}
+
+#registration-form .checkbox-wrapper input[type="checkbox"]:checked + .checkbox-custom::after
+{
+	opacity: 1;
+}
+
+#registration-form button
+{
+	width: 100%;
+	
+	padding: 10px;
+
+	font-size: 16px;
+
+	border: none;
+	border-radius: 4px;
+	
+	cursor: pointer;
+}
+
+#registration-form button:not(#clear-button):hover
+{
+	background-color: #218838;
+	transition: background-color 0.3s ease;
+}
+
+#registration-form button:not(#clear-button)
+{
+	background-color: #28a745;
+	color: white;
+}
+
+#registration-form #clear-button
+{
+	background-color: #dc3545;
+	color: white;
+
+	margin-top: 10px;
+}
+
+#registration-form #clear-button:hover
+{
+	background-color: #c82333;
+	transition: background-color 0.3s ease;
+}

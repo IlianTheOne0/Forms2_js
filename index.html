@@ -7,6 +7,24 @@
 	<link rel="stylesheet" href="styles/styles.css">
 </head>
 <body>
-	<script type="module" src="scripts/main.js"></script>
+	<form id="registration-form">
+		<h1>Registration Form</h1>
+
+		<label>Username: <input type="text" id="username" name="username" required></label>
+		<label>Email: <input type="email" id="email" name="email" required></label>
+		<label>Password: <input type="password" id="password" name="password" required></label>
+		<label>Confirm Password: <input type="password" id="confirm-password" name="confirm-password" required></label>
+
+		<label class="checkbox-wrapper">
+			<input type="checkbox" id="remember-me"/>
+			<span class="checkbox-custom"></span>
+			Remember me?
+		</label>
+
+		<button type="submit">Register</button>
+		<button type="button" id="clear-button">Clear all data</button>
+	</form>
+
+	<script src="scripts/main.js"></script>
 </body>
 </html>
