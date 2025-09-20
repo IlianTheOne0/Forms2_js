@@ -1,0 +1,130 @@
+name: Deploy ALL branches to GitHub Pages
+
+on:
+  push:
+  workflow_dispatch:
+    inputs:
+      branch_filter:
+        description: 'Optional grep pattern to only deploy branches matching this (e.g. hm or ^loop/). Leave empty to deploy all branches.'
+        required: false
+        default: ''
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+jobs:
+  build-and-deploy-all:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - name: Checkout (fetch all refs)
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Fetch remote refs
+        run: |
+          git fetch origin --prune --tags --no-recurse-submodules
+
+      - name: Setup Node (for possible builds)
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Build all branches and prepare pages_artifact
+        id: build_all
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          BRANCH_FILTER="${{ github.event.inputs.branch_filter || '' }}"
+          echo "Branch filter: '${BRANCH_FILTER}'"
+
+          # list remote branches (use ls-remote to avoid stray 'origin' entries)
+          mapfile -t ALL_BRANCHES < <(git ls-remote --heads origin | awk '{print $2}' | sed 's|refs/heads/||' | sort -u)
+
+          echo "Found ${#ALL_BRANCHES[@]} remote branches."
+
+          mkdir -p pages_artifact
+
+          for BR in "${ALL_BRANCHES[@]}"; do
+            if [[ -z "$BR" || "$BR" == "HEAD" ]]; then
+              echo "Skipping empty/HEAD entry: '$BR'"
+              continue
+            fi
+
+            if [[ -n "$BRANCH_FILTER" ]]; then
+              if ! echo "$BR" | grep -E -q "$BRANCH_FILTER"; then
+                echo "Skipping '$BR' (filter mismatch)"
+                continue
+              fi
+            fi
+
+            echo "==== Processing branch: $BR ===="
+            TMPDIR="$(mktemp -d)"
+
+            # Try to export the branch; if it fails skip this branch and continue
+            if ! git archive "origin/${BR}" | tar -x -C "$TMPDIR"; then
+              echo "Warning: failed to archive origin/${BR} — skipping branch." >&2
+              rm -rf "$TMPDIR"
+              continue
+            fi
+
+            TARGET_DIR="pages_artifact/${BR}"
+            mkdir -p "$TARGET_DIR"
+
+            if [ -f "$TMPDIR/package.json" ]; then
+              echo "Detected package.json in $BR — running npm install/build if available"
+              pushd "$TMPDIR" >/dev/null
+
+              if [ -f package-lock.json ] || [ -f npm-shrinkwrap.json ]; then
+                npm ci --unsafe-perm || true
+              else
+                npm install --unsafe-perm || true
+              fi
+
+              # run build if a build script exists; don't fail the whole job if build fails
+              if grep -q '"build"' package.json; then
+                npm run build || echo "Build failed for $BR (continuing with repo root)"
+              else
+                echo "No build script found in package.json for $BR"
+              fi
+              popd >/dev/null
+
+              if [ -d "$TMPDIR/dist" ]; then
+                rsync -a "$TMPDIR/dist"/ "$TARGET_DIR"/
+              elif [ -d "$TMPDIR/build" ]; then
+                rsync -a "$TMPDIR/build"/ "$TARGET_DIR"/
+              else
+                echo "No dist/build for $BR — copying repo root files"
+                rsync -a --exclude='.git' "$TMPDIR"/ "$TARGET_DIR"/
+              fi
+            else
+              rsync -a --exclude='.git' "$TMPDIR"/ "$TARGET_DIR"/
+            fi
+
+            # Ensure an index.html exists so Pages won't 404 for the branch root
+            if [ ! -f "$TARGET_DIR/index.html" ]; then
+              {
+                printf '%s\n' '<!doctype html>' '<meta charset="utf-8">' "<title>Branch: ${BR}</title>" "<h1>Branch: ${BR}</h1>" "<p>No index.html found — listing files:</p>" "<pre>"
+                find "$TARGET_DIR" -maxdepth 2 -type f -printf '%P\n' | sed 's/^/  /'
+                printf '%s\n' '</pre>'
+              } > "$TARGET_DIR/index.html"
+            fi
+
+            rm -rf "$TMPDIR"
+            echo "Finished branch: $BR"
+          done
+
+          echo "Prepared pages_artifact contents:"
+          find pages_artifact -maxdepth 4 -type f -print | sed -n '1,200p'
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: pages_artifact
+
+      - name: Deploy to GitHub Pages
+        uses: actions/deploy-pages@v4
