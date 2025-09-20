@@ -1,0 +1,14 @@
+body
+{
+	width: 100vw;
+	height: 100vh;
+
+	overflow-x: hidden;
+
+	margin: 0;
+
+	background-color: #3a3a3a;
+	color: white;
+
+	font-family: Arial, sans-serif;
+}

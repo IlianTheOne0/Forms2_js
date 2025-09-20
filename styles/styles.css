@@ -1,6 +1,5 @@
-body
-{
-	background-color: #3a3a3a;
-	
-	font-family: Arial, sans-serif;
-}
+@import "items/body.css";
+
+@import "items/header.css";
+@import "items/main.css";
+@import "items/footer.css";
