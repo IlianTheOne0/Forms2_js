@@ -26,5 +26,9 @@
 	"footer":
 	{
 		"copyright": "2025 Homework (en)"
+	},
+	"messages":
+	{
+		"languageChanged": "Language changed to English"
 	}
 }

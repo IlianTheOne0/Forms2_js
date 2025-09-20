@@ -5,7 +5,7 @@ export class IDisplayManager
 
 export class DisplayManager extends IDisplayManager
 {
-	async updateDisplayLanguage(languageManager)
+	async updateDisplayLanguage(languageManager, triggeredByUser = false)
 	{
 		try
 		{
@@ -15,6 +15,28 @@ export class DisplayManager extends IDisplayManager
 			if (!response.ok) { throw new Error(`Error! status: ${response.status}`); }
 			const data = await response.json();
 
+			if (data.messages?.languageChanged && triggeredByUser)
+			{
+				const messageDiv = document.getElementById("message-box");
+
+				if (messageDiv)
+				{
+					messageDiv.textContent = data.messages.languageChanged;
+					messageDiv.classList.add("visible");
+					messageDiv.classList.remove("hidden");
+
+					setTimeout
+					(
+						() =>
+						{
+							messageDiv.classList.add("hidden");
+							messageDiv.classList.remove("visible");
+						},
+						3000
+					);
+				}
+			}
+			
 			if (data.header?.title) { document.title = data.header.title; }
 
 			const headerTitle = document.querySelector("header h1");

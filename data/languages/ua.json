@@ -26,5 +26,9 @@
 	"footer":
 	{
 		"copyright": "2025 Домашнє завдання (ua)"
+	},
+	"messages":
+	{
+		"languageChanged": "Мову змінено на українську"
 	}
 }

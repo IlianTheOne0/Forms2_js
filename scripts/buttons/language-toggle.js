@@ -11,7 +11,7 @@ export function initializeLanguageToggle(languageManager, displayManager)
 			const currentLang = languageManager.getCurrentLanguage();
 			const newLang = currentLang === "en" ? "ua" : "en";
 			languageManager.setLanguage(newLang);
-			displayManager.updateDisplayLanguage(languageManager);
+			displayManager.updateDisplayLanguage(languageManager, true);
 		}
 	);
 }

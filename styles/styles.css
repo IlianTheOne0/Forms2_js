@@ -3,3 +3,15 @@
 @import "items/header.css";
 @import "items/main.css";
 @import "items/footer.css";
+
+@import "items/message-box.css";
+
+.hidden
+{
+	display: none;
+}
+
+.visible
+{
+	display: block;
+}
